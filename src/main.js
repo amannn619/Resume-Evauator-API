@@ -1,25 +1,31 @@
 import express from "express";
+import authRouter from  "./routes/authRoutes.js"
 import cors from "cors";
-import multer from "multer";
+import fs from "fs";
+import SwaggerUi from "swagger-ui-express";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import cookieParser from "cookie-parser";
 
-const upload = multer({ dest: 'uploads/' }); 
+const swaggerDoc = JSON.parse(fs.readFileSync("./swagger-output.json", 'utf-8'));
+
 const app = express();
+app.use('/api-docs', SwaggerUi.serve, SwaggerUi.setup(swaggerDoc));
 
-app.use(cors())
-    ; app.use(express.json());
+app.use(cors());
+app.use(cookieParser())
+app.use(express.json());
 
 app.get("/", (req, res) => {
     res.status(200).json({status: "success", message: "Hello World!"})
 })
 
-app.post("/api/evaluate", upload.any(), (req, res) => {
-    console.log(req.files)
-    res.status(200).json({status: "success", data: {
-        score: 55,
-        suggestions: ['Add more keywords', 'Fix typo in experience']
-    }})
+app.use("/api/auth", authRouter);
+
+app.use((req, res) => {
+    res.status(404).json({ status: "success", error: "Page not found." });
 })
 
+app.use(errorHandler);
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000")
