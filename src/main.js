@@ -6,12 +6,16 @@ import SwaggerUi from "swagger-ui-express";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import cookieParser from "cookie-parser";
 
-const swaggerDoc = JSON.parse(fs.readFileSync("./swagger-output.json", 'utf-8'));
+const corsOptions = {
+    origin: 'http://localhost:5173',
+    credentials: true
+}
 
+const swaggerDoc = JSON.parse(fs.readFileSync("./swagger-output.json", 'utf-8'));
 const app = express();
 app.use('/api-docs', SwaggerUi.serve, SwaggerUi.setup(swaggerDoc));
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(cookieParser())
 app.use(express.json());
 

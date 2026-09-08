@@ -28,7 +28,14 @@ export async function register(username, password) {
     })
     console.log(session)
 
-    return { accessToken,  refreshToken}
+    return {
+        accessToken,
+        refreshToken,
+        user: {
+            id: user.id,
+            username: user.user_name
+        }
+    }
 }
 
 export async function login(username, password) {
@@ -48,7 +55,14 @@ export async function login(username, password) {
             expires_at: getRefreshTokenExpiry()
         }
     });
-    return { accessToken, refreshToken };
+    return {
+        accessToken,
+        refreshToken,
+        user: {
+            id: user.id,
+            username: user.user_name
+        }
+    };
 }
 
 export async function refresh(refreshToken) {

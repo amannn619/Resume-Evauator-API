@@ -15,9 +15,9 @@ const cookieOptions = {
 export async function register(req, res) {
     // #swagger.tags = ['auth']
     const { username, password } = req.body;
-    const { accessToken, refreshToken } = await authService.register(username, password)
+    const { accessToken, refreshToken, user } = await authService.register(username, password)
     res.cookie('refresh_token', refreshToken, cookieOptions)
-    return new AppResponse(res, {accessToken}, null, 201)
+    return new AppResponse(res, {accessToken, user}, null, 201)
 }
 export async function login(req, res) {
     // #swagger.tags = ['auth']
@@ -32,9 +32,9 @@ export async function login(req, res) {
             
         }
     }
-    const { accessToken, refreshToken } = await authService.login(username, password);
+    const { accessToken, refreshToken, user } = await authService.login(username, password);
     res.cookie('refresh_token', refreshToken, cookieOptions);
-    return new AppResponse(res, { accessToken }, null, 201);
+    return new AppResponse(res, { accessToken, user }, null, 201);
 };
 
 export async function refresh(req, res, next) {
