@@ -1,6 +1,7 @@
 import { PDFParse } from "pdf-parse";
 import AppResponse from "../utils/appResponse.js";
 import { evaluateWithAI } from "../services/aiService.js";
+import * as resumeService from "../services/resumeService.js";
 
 export function getAllResumes(req, res) {
     
@@ -10,8 +11,12 @@ export function getResume(req, res) {
     
 };
 
-export function saveResume(req, res) {
-    
+export async function saveResume(req, res) {
+    const userId = req.user.id;
+    const file = req.file;
+
+    const resume = await resumeService.saveResume(userId, file);
+    return new AppResponse(res, resume, null, 201);
 };
 
 export function deleteAllResumes(req, res){
@@ -37,6 +42,5 @@ export async function evaluateResume(req, res) {
     }
 
     const evaluation = await evaluateWithAI(resumeText.text, description);
-    console.log(evaluation)
     return new AppResponse(res, evaluation)
 };

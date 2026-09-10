@@ -6,10 +6,10 @@ import { verifyRefreshToken } from "../utils/jwtHelper.js";
 
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: false,
+    sameSite: 'lax',
     maxAge: 7 * 24 * 3600 * 1000,
-    path: '/api/auth'
+    path: '/'
 }
 
 export async function register(req, res) {
