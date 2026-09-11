@@ -9,6 +9,35 @@ function getRefreshTokenExpiry() {
     return date;
 }
 
+export async function me(refreshToken) {
+    const decoded = verifyRefreshToken(refreshToken);
+    if (!decoded) {
+        throw new AppError("Invalid token", 401);
+    }
+    const session = await prisma.session.findUnique({
+        where: {
+            refresh_token: refreshToken,
+            revoked: false
+        },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    user_name: true
+                }
+            }
+        }
+    })
+    if (!session) {
+        throw new AppError("Invalid token", 401);
+    }
+    const accessToken = generateAcesssToken(session.user.user_id);
+    return {accessToken, user: {
+        id: session.user.id,
+        username: session.user.user_name
+    }}
+}
+
 export async function register(username, password) {
     const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({

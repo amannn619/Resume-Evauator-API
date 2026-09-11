@@ -21,6 +21,19 @@
         }
       }
     },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/auth/register": {
       "post": {
         "tags": [

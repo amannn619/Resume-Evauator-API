@@ -12,6 +12,16 @@ const cookieOptions = {
     path: '/'
 }
 
+export async function me(req, res) {
+    // #swagger.tags = ['auth']
+    const refreshToken = req.cookies.refresh_token;
+    if (!refreshToken) {
+        throw new AppError("Refresh token missing", 401);
+    }
+    const { accessToken, user } = await authService.me(refreshToken);
+    return new AppResponse(res, { accessToken, user });
+}
+
 export async function register(req, res) {
     // #swagger.tags = ['auth']
     const { username, password } = req.body;

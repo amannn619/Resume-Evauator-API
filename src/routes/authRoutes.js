@@ -5,6 +5,7 @@ import validateRequest from "../middlewares/validateRequest.js";
 
 const router = Router();
 
+router.get('/me', authController.me);
 router.post('/register', validateRequest(userSchema), authController.register);
 router.post('/login', validateRequest(userSchema), authController.login);
 router.post('/refresh', authController.refresh);
