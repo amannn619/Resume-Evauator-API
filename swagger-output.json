@@ -95,7 +95,7 @@
       }
     },
     "/api/auth/refresh": {
-      "post": {
+      "get": {
         "tags": [
           "auth"
         ],
@@ -108,7 +108,7 @@
       }
     },
     "/api/auth/logout": {
-      "post": {
+      "get": {
         "description": "",
         "responses": {
           "default": {

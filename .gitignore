@@ -8,6 +8,7 @@ node_modules/
 
 # Database / Secrets
 .env
+/uploads/
 
 # System files
 .DS_Store

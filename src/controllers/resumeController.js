@@ -4,7 +4,7 @@ import { evaluateWithAI } from "../services/aiService.js";
 import * as resumeService from "../services/resumeService.js";
 
 export function getAllResumes(req, res) {
-    
+    return new AppResponse(res, []);
 };
 
 export function getResume(req, res) {
