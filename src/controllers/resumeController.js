@@ -56,6 +56,14 @@ export function evaluateAllResume(req, res) {
     
 }
 
+export async function evaluateSavedResume(req, res) {    
+    const userId = req.user.id;
+    const resumeId = parseInt(req.params.id);
+    const description = req.body.description;
+    const evaluation = await resumeService.evaluateSavedResume(userId, resumeId, description);
+    return new AppResponse(res, evaluation)
+};
+
 export async function evaluateResume(req, res) {
     // #swagger.tags = ['auth']
     const description = req.body.description;

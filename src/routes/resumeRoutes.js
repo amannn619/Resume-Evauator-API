@@ -15,6 +15,7 @@ router.post("/", uploadMiddleware, authMiddleware, resumeController.saveResume);
 router.delete("/", authMiddleware, resumeController.deleteAllResumes);
 router.delete("/:id", authMiddleware, resumeController.deleteResume);
 // router.post("/evaluate", authMiddleware, resumeController.evaluateAllResume);
+router.post("/evaluateSavedResume", authMiddleware, validateRequest(evaluateResumeSchema), resumeController.evaluateSavedResume);
 router.post("/evaluateResume", uploadMiddleware, validateRequest(evaluateResumeSchema), resumeController.evaluateResume);
 
 export default router;

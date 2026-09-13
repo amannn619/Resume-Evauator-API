@@ -131,3 +131,17 @@ export async function deleteResume(userId, resumeId) {
     }
     return deletedRecord;
 }
+
+export async function evaluateSavedResume(userId, resumeId, description) {
+    const resume = await prisma.resume.findUnique({
+        where: { id: resumeId, user_id: userId }
+    });
+    if (!resume) {
+        throw new AppError("Resume not found.", 404);
+    }
+
+    const filePath = path.join(process.cwd(), 'uploads', String(userId), String(resumeId), `${resume.file_name}.txt`)
+    const resumeText = await fs.readFile(filePath, 'utf-8');
+    const evaluation = await evaluateWithAI(resumeText, description);
+    return evaluation;
+}

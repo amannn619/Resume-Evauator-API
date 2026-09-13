@@ -216,6 +216,30 @@
         }
       }
     },
+    "/api/resume/evaluateSavedResume": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/resume/evaluateResume": {
       "post": {
         "tags": [
