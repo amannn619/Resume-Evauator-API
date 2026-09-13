@@ -45,8 +45,11 @@ export function deleteAllResumes(req, res){
     
 };
 
-export function deleteResume(req, res){
-    
+export async function deleteResume(req, res) {
+    const userId = req.user.id;
+    const resumeId = parseInt(req.params.id);
+    await resumeService.deleteResume(userId, resumeId)
+    return new AppResponse(res, null, "Resume Deleted Successfully");
 };
 
 export function evaluateAllResume(req, res) {

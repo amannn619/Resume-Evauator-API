@@ -110,3 +110,24 @@ export async function saveResume(userId, file) {
         fileName: resume.file_name
     };
 }
+
+export async function deleteResume(userId, resumeId) {    
+    const deletedRecord = await prisma.resume.deleteMany({
+        where: { id: resumeId, user_id: userId },
+    });
+    if (deletedRecord.count === 0) {
+        throw new AppError('Resume not found or unauthorized', 404);
+    }
+
+    const resumeDirPath = path.join(process.cwd(), 'uploads', String(userId), String(resumeId));
+
+    try {
+        await fs.rm(resumeDirPath, { 
+            recursive: true,
+            force: true
+        });
+    } catch (error) {
+        console.error(`Failed to delete folder from disk: ${resumeDirPath}`, error);
+    }
+    return deletedRecord;
+}
