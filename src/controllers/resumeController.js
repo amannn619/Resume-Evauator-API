@@ -5,58 +5,46 @@ import * as resumeService from "../services/resumeService.js";
 import { AppError } from "../utils/appError.js";
 
 export async function getAllResumes(req, res) {
+    // #swagger.tags = ['resume']
     const userId = req.user.id;
     const resumes = await resumeService.getAllResumes(userId);
     return new AppResponse(res, resumes);
 };
 
-export async function getDownloadTicket(req, res) {
+export async function saveResume(req, res) {
+    // #swagger.tags = ['resume']
     const userId = req.user.id;
-    const resumeId = parseInt(req.params.id);
-    const url = await resumeService.getDownloadTicket(userId, resumeId);
-    return new AppResponse(res, {url})
-}
+    const file = req.file;
+    const resume = await resumeService.saveResume(userId, file);
+    return new AppResponse(res, resume, null, 201);
+};
 
 export async function downloadResume(req, res) {
-    const token = req.params.token;
-    const { filePath, fileName } = await resumeService.downloadResume(token)
-    console.log(fileName)
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
-    return res.sendFile(filePath);
-}
+    // #swagger.tags = ['resume']
+    const userId = req.user.id;
+    const resumeId = parseInt(req.params.id);
+    const url = await resumeService.downloadResume(userId, resumeId);
+    return new AppResponse(res, {url})
+};
 
 export async function getResume(req, res) {
+    // #swagger.tags = ['resume']
     const userId = req.user.id;
     const resumeId = parseInt(req.params.id);
     const resume = await resumeService.getResume(userId, resumeId);
     return new AppResponse(res, resume);
 };
 
-export async function saveResume(req, res) {
-    const userId = req.user.id;
-    const file = req.file;
-
-    const resume = await resumeService.saveResume(userId, file);
-    return new AppResponse(res, resume, null, 201);
-};
-
-export function deleteAllResumes(req, res){
-    
-};
-
 export async function deleteResume(req, res) {
+    // #swagger.tags = ['resume']
     const userId = req.user.id;
     const resumeId = parseInt(req.params.id);
     await resumeService.deleteResume(userId, resumeId)
     return new AppResponse(res, null, "Resume Deleted Successfully");
 };
 
-export function evaluateAllResume(req, res) {
-    
-}
-
-export async function evaluateSavedResume(req, res) {    
+export async function evaluateSavedResume(req, res) {   
+    // #swagger.tags = ['resume'] 
     const userId = req.user.id;
     const resumeId = parseInt(req.params.id);
     const description = req.body.description;
@@ -65,7 +53,7 @@ export async function evaluateSavedResume(req, res) {
 };
 
 export async function evaluateResume(req, res) {
-    // #swagger.tags = ['auth']
+    // #swagger.tags = ['resume']
     const description = req.body.description;
     const parser = new PDFParse({data: req.file.buffer});
     const resumeText = await parser.getText();

@@ -31,7 +31,7 @@ export async function me(refreshToken) {
     if (!session) {
         throw new AppError("Invalid token", 401);
     }
-    const accessToken = generateAcesssToken(session.user.user_id);
+    const accessToken = generateAcesssToken(session.user.id);
     return {accessToken, user: {
         id: session.user.id,
         username: session.user.user_name
@@ -55,7 +55,6 @@ export async function register(username, password) {
             expires_at: getRefreshTokenExpiry()
         }
     })
-    console.log(session)
 
     return {
         accessToken,

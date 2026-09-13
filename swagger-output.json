@@ -119,6 +119,9 @@
     },
     "/api/resume/": {
       "get": {
+        "tags": [
+          "resume"
+        ],
         "description": "",
         "responses": {
           "default": {
@@ -127,14 +130,9 @@
         }
       },
       "post": {
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
+        "tags": [
+          "resume"
+        ],
         "description": "",
         "responses": {
           "default": {
@@ -143,8 +141,11 @@
         }
       }
     },
-    "/api/resume/{id}/ticket": {
+    "/api/resume/download/{id}": {
       "get": {
+        "tags": [
+          "resume"
+        ],
         "description": "",
         "parameters": [
           {
@@ -157,33 +158,15 @@
         "responses": {
           "default": {
             "description": ""
-          }
-        }
-      }
-    },
-    "/api/resume/download/{token}": {
-      "get": {
-        "description": "",
-        "produces": [
-          "application/pdf"
-        ],
-        "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
           }
         }
       }
     },
     "/api/resume/{id}": {
       "get": {
+        "tags": [
+          "resume"
+        ],
         "description": "",
         "parameters": [
           {
@@ -200,6 +183,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "resume"
+        ],
         "description": "",
         "parameters": [
           {
@@ -216,10 +202,19 @@
         }
       }
     },
-    "/api/resume/evaluateSavedResume": {
+    "/api/resume/evaluateSavedResume/{id}": {
       "post": {
+        "tags": [
+          "resume"
+        ],
         "description": "",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -243,7 +238,7 @@
     "/api/resume/evaluateResume": {
       "post": {
         "tags": [
-          "auth"
+          "resume"
         ],
         "description": "",
         "parameters": [

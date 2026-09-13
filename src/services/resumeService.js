@@ -3,7 +3,17 @@ import prisma from './db.js';
 import { AppError } from '../utils/appError.js';
 import { PDFParse } from 'pdf-parse';
 import path from 'path';
-import { generateJwtToken, verifyJwtToken } from '../utils/jwtHelper.js';
+import cloudinaryPkg from 'cloudinary';
+import streamifier from 'streamifier';
+import 'dotenv/config';
+
+const cloudinary = cloudinaryPkg.v2;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function getAllResumes(userId) {
     const resumes = await prisma.resume.findMany({
@@ -13,57 +23,12 @@ export async function getAllResumes(userId) {
         return {
             id: resume.id,
             userId: resume.user_id,
+            fileName: resume.file_name,
+            cloudinaryId: resume.cloudinary_id,
             createdAt: resume.created_at,
-            fileName: resume.file_name
+            updatedAt: resume.updated_at,
         }
     })
-}
-
-export async function getDownloadTicket(userId, resumeId) {
-    const resume = await prisma.resume.findUnique({
-        where: { id: resumeId },
-    });
-
-    if (!resume) {
-        throw new AppError("Resume not found.", 404);
-    }
-
-    const jwtToken = generateJwtToken({ userId, resumeId });
-    const url = `/api/resume/download/${jwtToken}`;
-    return url;
-}
-
-export async function downloadResume(token) {
-    if (!token) {
-        throw new AppError("Invalid URL", 400);
-    }
-
-    const decoded = verifyJwtToken(token);
-    if (!decoded) {
-        throw new AppError("Invalid token signature", 400);
-    }
-
-    const resume = await prisma.resume.findUnique({
-        where: {id: decoded.resumeId}
-    })
-    const filePath = path.join(process.cwd(), 'uploads', String(decoded.userId), String(decoded.resumeId), `${resume.file_name}.pdf`);
-    return { filePath, fileName: `${resume.file_name}.pdf` };
-}
-
-export async function getResume(userId, resumeId) {
-    const resume = await prisma.resume.findUnique({
-        where: { id: resumeId },
-    });
-
-    if (!resume) {
-        throw new AppError("Resume not found.", 404);
-    }
-    return {
-        id: resume.id,
-        userId: resume.user_id,
-        createdAt: resume.created_at,
-        fileName: resume.file_name
-    };
 }
 
 export async function saveResume(userId, file) {
@@ -79,69 +44,118 @@ export async function saveResume(userId, file) {
         throw new AppError('No resume file provided.', 400);
     }
 
+    
     const safeBaseName = file.originalname
         .replace(/\.[^/.]+$/, "")
         .replace(/[^a-zA-Z0-9-_\.]/g, "_");
-    
-    const resume = await prisma.resume.create({
-        data: {
-            user_id: userId,
-            file_name: safeBaseName
-        }
-    });
 
-    const baseDir = path.join(process.cwd(), 'uploads', String(userId), String(resume.id));
+    const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                resource_type: 'image',
+                type: 'authenticated',
+                folder: `resumes/${userId}`,
+                format: 'pdf',
+                public_id: safeBaseName
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        );
+        streamifier.createReadStream(file.buffer).pipe(stream);
+    })
+
+
     const parser = new PDFParse({ data: file.buffer });
     const resumeText = await parser.getText();
 
-    await fs.mkdir(baseDir, { recursive: true });
-    const pdfPath = path.join(baseDir, `${safeBaseName}.pdf`);
-    const txtPath = path.join(baseDir, `${safeBaseName}.txt`);
-
-    await Promise.all([
-        fs.writeFile(pdfPath, file.buffer),
-        fs.writeFile(txtPath, resumeText.text, 'utf8')
-    ]);
+    const resume = await prisma.resume.create({
+        data: {
+            user_id: userId,
+            file_name: safeBaseName,
+            cloudinary_id: uploadResult.public_id,
+            resume_text: resumeText.text
+        }
+    });
 
     return {
         id: resume.id,
         userId: resume.user_id,
+        fileName: resume.file_name,
+        cloudinaryId: resume.cloudinary_id,
         createdAt: resume.created_at,
-        fileName: resume.file_name
+        updatedAt: resume.updated_at,
+    };
+}
+
+export async function downloadResume(userId, resumeId) {
+    const resume = await prisma.resume.findUnique({
+        where: { id: resumeId, user_id: userId },
+    });
+
+    if (!resume) {
+        throw new AppError("Resume not found.", 404);
+    }
+
+    const url = cloudinary.url(resume.cloudinary_id, {
+        resource_type: 'image',
+        type: 'authenticated', // Tells Cloudinary to expect a signature
+        sign_url: true,        // Automatically signs the URL with your API Secret
+        expires_at: Math.floor(Date.now() / 1000) + 60, // Expires in 60s
+    });
+    
+    return url;
+}
+
+export async function getResume(userId, resumeId) {
+    const resume = await prisma.resume.findUnique({
+        where: { id: resumeId },
+    });
+
+    if (!resume) {
+        throw new AppError("Resume not found.", 404);
+    }
+    return {
+        id: resume.id,
+        userId: resume.user_id,
+        fileName: resume.file_name,
+        cloudinaryId: resume.cloudinary_id,
+        createdAt: resume.created_at,
+        updatedAt: resume.updated_at,
     };
 }
 
 export async function deleteResume(userId, resumeId) {    
-    const deletedRecord = await prisma.resume.deleteMany({
+    const resume = await prisma.resume.delete({
         where: { id: resumeId, user_id: userId },
     });
-    if (deletedRecord.count === 0) {
+    
+    if (!resume) {
         throw new AppError('Resume not found or unauthorized', 404);
     }
 
-    const resumeDirPath = path.join(process.cwd(), 'uploads', String(userId), String(resumeId));
-
     try {
-        await fs.rm(resumeDirPath, { 
-            recursive: true,
-            force: true
+        await cloudinary.uploader.destroy(resume.cloudinary_id, {
+            type: 'authenticated',
+            resource_type: 'image',
+            invalidate: true
         });
-    } catch (error) {
-        console.error(`Failed to delete folder from disk: ${resumeDirPath}`, error);
+    } catch (cloudError) {
+        console.error(`Orphaned Cloudinary asset left behind: ${resume.cloudinary_id}`, cloudError);
     }
-    return deletedRecord;
+
+    return resume;
 }
 
 export async function evaluateSavedResume(userId, resumeId, description) {
+    console.log(userId, resumeId)
     const resume = await prisma.resume.findUnique({
         where: { id: resumeId, user_id: userId }
     });
     if (!resume) {
         throw new AppError("Resume not found.", 404);
     }
-
-    const filePath = path.join(process.cwd(), 'uploads', String(userId), String(resumeId), `${resume.file_name}.txt`)
-    const resumeText = await fs.readFile(filePath, 'utf-8');
-    const evaluation = await evaluateWithAI(resumeText, description);
+    const evaluation = await evaluateWithAI(resume.resume_text, description);
     return evaluation;
 }
