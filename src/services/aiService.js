@@ -47,7 +47,8 @@ export async function evaluateWithAI(resumeText, jobDescription) {
         "detected_experience": "<e.g., '3.2 years' or 'Unclear'>",
         "strengths": ["<strength 1>", "<strength 2>"],
         "missing_keywords": ["<missing tool>"],
-        "improvements": ["<actionable recommendation>"]
+        "improvements": ["<actionable recommendation>"],
+        "job_title": "<job title extracted from the description>"
         }
         
         You MUST output valid JSON exactly matching this structure:
@@ -56,7 +57,8 @@ export async function evaluateWithAI(resumeText, jobDescription) {
         "detected_experience": "<string, e.g. '3.5 years' or 'Unclear'>",
         "strengths": ["<qualitative alignment>"],
         "missing_keywords": ["<keyword 1>", "<keyword 2>"],
-        "improvements": ["<actionable tip>"]
+        "improvements": ["<actionable tip>"],
+        "job_title": "<job title extracted from the description>"
         }
     `;
 

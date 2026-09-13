@@ -6,6 +6,7 @@ import path from 'path';
 import cloudinaryPkg from 'cloudinary';
 import streamifier from 'streamifier';
 import 'dotenv/config';
+import { evaluateWithAI } from './aiService.js';
 
 const cloudinary = cloudinaryPkg.v2;
 
@@ -157,5 +158,17 @@ export async function evaluateSavedResume(userId, resumeId, description) {
         throw new AppError("Resume not found.", 404);
     }
     const evaluation = await evaluateWithAI(resume.resume_text, description);
+    const score = parseInt(evaluation.score);
+    if (!Number.isNaN(score)) {
+        await prisma.evaluation.create({
+            data: {
+                user_id: userId,
+                resume_id: resumeId,
+                job_title: evaluation.job_title || 'Unspecified Role',
+                job_description: description,
+                score: score,
+            }
+        })
+    }
     return evaluation;
 }

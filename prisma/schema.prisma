@@ -16,10 +16,11 @@ model User {
   id Int @id @default(autoincrement())
   user_name String @unique
   password String
-  updated_at DateTime @default(now())
-  created_at DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
   session Session[]
   resume Resume[]
+  evaluation Evaluation[]
 }
 
 model Session {
@@ -28,8 +29,8 @@ model Session {
   refresh_token String @unique
   expires_at DateTime
   revoked Boolean @default(false)
-  updated_at DateTime @default(now())
-  created_at DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
@@ -39,7 +40,21 @@ model Resume {
   file_name String
   cloudinary_id String
   resume_text String
-  updated_at DateTime @default(now())
-  created_at DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  evaluation Evaluation[]
+}
+
+model Evaluation {
+  id Int  @id @default(autoincrement())
+  user_id Int
+  resume_id Int
+  job_title String
+  job_description String
+  score Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  resume Resume @relation(fields: [resume_id], references: [id], onDelete: Cascade)
 }
