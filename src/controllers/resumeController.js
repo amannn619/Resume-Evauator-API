@@ -2,13 +2,20 @@ import { PDFParse } from "pdf-parse";
 import AppResponse from "../utils/appResponse.js";
 import { evaluateWithAI } from "../services/aiService.js";
 import * as resumeService from "../services/resumeService.js";
+import { AppError } from "../utils/appError.js";
 
-export function getAllResumes(req, res) {
-    return new AppResponse(res, []);
+export async function getAllResumes(req, res) {
+    const userId = req.user.id;
+    const resumes = await resumeService.getAllResumes(userId);
+    return new AppResponse(res, resumes);
 };
 
-export function getResume(req, res) {
-    
+export async function getResume(req, res) {
+    const userId = req.user.id;
+    const resumeId = parseInt(req.params.id);
+    const filePath = await resumeService.getResume(userId, resumeId);
+    res.setHeader('Content-Type', 'application/pdf');
+    return res.sendFile(filePath);
 };
 
 export async function saveResume(req, res) {

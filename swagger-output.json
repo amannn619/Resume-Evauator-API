@@ -146,6 +146,9 @@
     "/api/resume/{id}": {
       "get": {
         "description": "",
+        "produces": [
+          "application/pdf"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -155,8 +158,8 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       },

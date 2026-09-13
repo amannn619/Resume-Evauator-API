@@ -29,7 +29,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/resume", resumeRouter )
 
 app.use((req, res) => {
-    res.status(404).json({ status: "success", error: "Page not found." });
+    res.status(404).json({ status: "error", error: "Page not found." });
 })
 
 app.use(errorHandler);
