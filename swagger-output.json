@@ -143,12 +143,9 @@
         }
       }
     },
-    "/api/resume/{id}": {
+    "/api/resume/{id}/ticket": {
       "get": {
         "description": "",
-        "produces": [
-          "application/pdf"
-        ],
         "parameters": [
           {
             "name": "id",
@@ -158,8 +155,47 @@
           }
         ],
         "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/resume/download/{token}": {
+      "get": {
+        "description": "",
+        "produces": [
+          "application/pdf"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/resume/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       },

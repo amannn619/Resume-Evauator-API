@@ -10,12 +10,27 @@ export async function getAllResumes(req, res) {
     return new AppResponse(res, resumes);
 };
 
+export async function getDownloadTicket(req, res) {
+    const userId = req.user.id;
+    const resumeId = parseInt(req.params.id);
+    const url = await resumeService.getDownloadTicket(userId, resumeId);
+    return new AppResponse(res, {url})
+}
+
+export async function downloadResume(req, res) {
+    const token = req.params.token;
+    const { filePath, fileName } = await resumeService.downloadResume(token)
+    console.log(fileName)
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    return res.sendFile(filePath);
+}
+
 export async function getResume(req, res) {
     const userId = req.user.id;
     const resumeId = parseInt(req.params.id);
-    const filePath = await resumeService.getResume(userId, resumeId);
-    res.setHeader('Content-Type', 'application/pdf');
-    return res.sendFile(filePath);
+    const resume = await resumeService.getResume(userId, resumeId);
+    return new AppResponse(res, resume);
 };
 
 export async function saveResume(req, res) {

@@ -3,6 +3,7 @@ import prisma from './db.js';
 import { AppError } from '../utils/appError.js';
 import { PDFParse } from 'pdf-parse';
 import path from 'path';
+import { generateJwtToken, verifyJwtToken } from '../utils/jwtHelper.js';
 
 export async function getAllResumes(userId) {
     const resumes = await prisma.resume.findMany({
@@ -18,24 +19,51 @@ export async function getAllResumes(userId) {
     })
 }
 
+export async function getDownloadTicket(userId, resumeId) {
+    const resume = await prisma.resume.findUnique({
+        where: { id: resumeId },
+    });
+
+    if (!resume) {
+        throw new AppError("Resume not found.", 404);
+    }
+
+    const jwtToken = generateJwtToken({ userId, resumeId });
+    const url = `/api/resume/download/${jwtToken}`;
+    return url;
+}
+
+export async function downloadResume(token) {
+    if (!token) {
+        throw new AppError("Invalid URL", 400);
+    }
+
+    const decoded = verifyJwtToken(token);
+    if (!decoded) {
+        throw new AppError("Invalid token signature", 400);
+    }
+
+    const resume = await prisma.resume.findUnique({
+        where: {id: decoded.resumeId}
+    })
+    const filePath = path.join(process.cwd(), 'uploads', String(decoded.userId), String(decoded.resumeId), `${resume.file_name}.pdf`);
+    return { filePath, fileName: `${resume.file_name}.pdf` };
+}
+
 export async function getResume(userId, resumeId) {
     const resume = await prisma.resume.findUnique({
         where: { id: resumeId },
-        select: {
-            file_name: true
-        }
     });
 
-    if (!resume || !resume.file_name) {
-        throw new AppError("File does not exist.", 404);
+    if (!resume) {
+        throw new AppError("Resume not found.", 404);
     }
-    const filePath = path.join(process.cwd(), 'uploads', String(userId), String(resumeId), `${resume.file_name}.pdf`);
-    try {
-        await fs.access(filePath);
-    } catch (err) {
-        throw new AppError('File no longer exists on the server', 404);
-    }
-    return filePath;
+    return {
+        id: resume.id,
+        userId: resume.user_id,
+        createdAt: resume.created_at,
+        fileName: resume.file_name
+    };
 }
 
 export async function saveResume(userId, file) {
