@@ -127,6 +127,72 @@ export async function getResume(userId, resumeId) {
     };
 }
 
+export async function updateResume(userId, resumeId, file) {
+
+    const existingResume = await prisma.resume.findFirst({
+        where: { id: resumeId, user_id: userId }
+    });
+
+    if (!existingResume) {
+        throw new AppError("Resume not found or unauthorized", 404);
+    }
+
+    const safeBaseName = file.originalname
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[^a-zA-Z0-9-_\.]/g, "_");
+
+    const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                resource_type: 'image',
+                type: 'authenticated',
+                folder: `resumes/${userId}`,
+                format: 'pdf',
+                public_id: safeBaseName
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        );
+        streamifier.createReadStream(file.buffer).pipe(stream);
+    });
+
+    try {
+        await cloudinary.uploader.destroy(existingResume.cloudinary_id, {
+            type: 'authenticated',  
+            resource_type: 'image', 
+            invalidate: true        
+        });
+    } catch (cloudError) {
+        console.error(`Failed to delete old Cloudinary asset: ${existingResume.cloudinary_id}`, cloudError);
+    }
+
+    const parser = new PDFParse({ data: file.buffer });
+    const resumeText = await parser.getText();
+
+    const resume = await prisma.resume.update({
+        where: {
+            id: resumeId
+        },
+        data: {
+            file_name: safeBaseName,
+            cloudinary_id: uploadResult.public_id,
+            resume_text: resumeText.text
+        }
+    });
+
+    return {
+        id: resume.id,
+        userId: resume.user_id,
+        fileName: resume.file_name,
+        cloudinaryId: resume.cloudinary_id,
+        createdAt: resume.created_at,
+        updatedAt: resume.updated_at,
+    };
+    
+}
+
 export async function deleteResume(userId, resumeId) {    
     const resume = await prisma.resume.delete({
         where: { id: resumeId, user_id: userId },
@@ -150,7 +216,6 @@ export async function deleteResume(userId, resumeId) {
 }
 
 export async function evaluateSavedResume(userId, resumeId, description) {
-    console.log(userId, resumeId)
     const resume = await prisma.resume.findUnique({
         where: { id: resumeId, user_id: userId }
     });

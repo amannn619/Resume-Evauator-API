@@ -182,6 +182,25 @@
           }
         }
       },
+      "put": {
+        "tags": [
+          "resume"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
       "delete": {
         "tags": [
           "resume"

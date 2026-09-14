@@ -35,6 +35,16 @@ export async function getResume(req, res) {
     return new AppResponse(res, resume);
 };
 
+export async function updateResume(req, res) {
+    // #swagger.tags = ['resume']
+    const userId = req.user.id;
+    const resumeId = parseInt(req.params.id);
+    const file = req.file;
+    const resume = await resumeService.updateResume(userId, resumeId, file);
+    return new AppResponse(res, resume, null, 200);
+};
+
+
 export async function deleteResume(req, res) {
     // #swagger.tags = ['resume']
     const userId = req.user.id;

@@ -11,6 +11,7 @@ router.get("/", authMiddleware, resumeController.getAllResumes);
 router.post("/", uploadMiddleware, authMiddleware, resumeController.saveResume);
 router.get('/download/:id', authMiddleware, resumeController.downloadResume);
 router.get("/:id", authMiddleware, resumeController.getResume);
+router.put("/:id", uploadMiddleware, authMiddleware, resumeController.updateResume);
 router.delete("/:id", authMiddleware, resumeController.deleteResume);
 router.post("/evaluateSavedResume/:id", authMiddleware, validateRequest(evaluateResumeSchema), resumeController.evaluateSavedResume);
 router.post("/evaluateResume", uploadMiddleware, validateRequest(evaluateResumeSchema), resumeController.evaluateResume);
