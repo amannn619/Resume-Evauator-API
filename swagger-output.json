@@ -221,40 +221,7 @@
         }
       }
     },
-    "/api/resume/evaluateSavedResume/{id}": {
-      "post": {
-        "tags": [
-          "resume"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "description": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/resume/evaluateResume": {
+    "/api/evaluation/evaluateResume": {
       "post": {
         "tags": [
           "resume"
@@ -284,6 +251,39 @@
     "/api/evaluation/": {
       "get": {
         "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/evaluation/evaluateSavedResume/{id}": {
+      "post": {
+        "tags": [
+          "evaluation"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""

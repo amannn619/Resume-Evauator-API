@@ -58,8 +58,8 @@ model Evaluation {
   resumeId       Int      @map("resume_id")
   jobTitle       String   @map("job_title")
   jobDescription String   @map("job_description")
-
   score          Int
+  aiResponse     Json     @map("ai_response")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

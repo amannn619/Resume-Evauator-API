@@ -86,7 +86,7 @@ export async function downloadResume(userId, resumeId) {
         throw new AppError("Resume not found.", 404);
     }
 
-    const url = cloudinary.url(resume.cloudinary_id, {
+    const url = cloudinary.url(resume.cloudinaryId, {
         resource_type: 'image',
         type: 'authenticated', // Tells Cloudinary to expect a signature
         sign_url: true,        // Automatically signs the URL with your API Secret
@@ -190,27 +190,4 @@ export async function deleteResume(userId, resumeId) {
     }
 
     return resume;
-}
-
-export async function evaluateSavedResume(userId, resumeId, description) {
-    const resume = await prisma.resume.findUnique({
-        where: { id: resumeId, userId: userId }
-    });
-    if (!resume) {
-        throw new AppError("Resume not found.", 404);
-    }
-    const evaluation = await evaluateWithAI(resume.resumeText, description);
-    const score = parseInt(evaluation.score);
-    if (!Number.isNaN(score)) {
-        await prisma.evaluation.create({
-            data: {
-                userId: userId,
-                resumeId: resumeId,
-                jobTitle: evaluation.job_title || 'Unspecified Role',
-                jobDescription: description,
-                score: score,
-            }
-        })
-    }
-    return evaluation;
 }

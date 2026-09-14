@@ -122,7 +122,8 @@ export async function refresh(refreshToken) {
     await prisma.session.create({
         data: {
             userId: session.userId,
-            refreshAt: getRefreshTokenExpiry()
+            refreshToken: newRefreshToken,
+            expiresAt: getRefreshTokenExpiry()
         }
     })
     return { accessToken, refreshToken: newRefreshToken }
