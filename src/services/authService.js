@@ -16,14 +16,14 @@ export async function me(refreshToken) {
     }
     const session = await prisma.session.findUnique({
         where: {
-            refresh_token: refreshToken,
+            refreshToken: refreshToken,
             revoked: false
         },
         include: {
             user: {
                 select: {
                     id: true,
-                    user_name: true
+                    userName: true
                 }
             }
         }
@@ -32,17 +32,14 @@ export async function me(refreshToken) {
         throw new AppError("Invalid token", 401);
     }
     const accessToken = generateAcesssToken(session.user.id);
-    return {accessToken, user: {
-        id: session.user.id,
-        username: session.user.user_name
-    }}
+    return {accessToken, user: session.user}
 }
 
-export async function register(username, password) {
+export async function register(userName, password) {
     const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
         data: {
-            user_name: username,
+            userName: userName,
             password: hashedPassword
         }
     })
@@ -50,9 +47,9 @@ export async function register(username, password) {
     const refreshToken = generateRefreshToken(user.id);
     const session = await prisma.session.create({
         data: {
-            user_id: user.id,
-            refresh_token: refreshToken,
-            expires_at: getRefreshTokenExpiry()
+            userId: user.id,
+            refreshToken: refreshToken,
+            expiresAt: getRefreshTokenExpiry()
         }
     })
 
@@ -61,14 +58,14 @@ export async function register(username, password) {
         refreshToken,
         user: {
             id: user.id,
-            username: user.user_name
+            userName: user.userName
         }
     }
 }
 
-export async function login(username, password) {
+export async function login(userName, password) {
     const user = await prisma.user.findUnique({
-        where: { user_name: username }
+        where: { userName: userName }
     })
     if (!user || !(await comparePassword(password, user.password))) {
         throw new AppError("Invalid Credentials", 401);
@@ -78,9 +75,9 @@ export async function login(username, password) {
 
     const session = await prisma.session.create({
         data: {
-            user_id: user.id,
-            refresh_token: refreshToken,
-            expires_at: getRefreshTokenExpiry()
+            userId: user.id,
+            refreshToken: refreshToken,
+            expiresAt: getRefreshTokenExpiry()
         }
     });
     return {
@@ -88,7 +85,7 @@ export async function login(username, password) {
         refreshToken,
         user: {
             id: user.id,
-            username: user.user_name
+            userName: user.userName
         }
     };
 }
@@ -100,33 +97,32 @@ export async function refresh(refreshToken) {
     }
 
     const session = await prisma.session.findUnique({
-        where: { refresh_token: refreshToken }
+        where: { refreshToken: refreshToken }
     });
 
     if (session && session.revoked) {
         await prisma.session.updateMany({
-            where: { user_id: session.user_id },
+            where: { userId: session.userId },
             data: { revoked: true }
         });
         throw new AppError("Compromised token detected. All sessions revoked.", 401);
     }
-    if (!session || session.expires_at < new Date()) {
+    if (!session || session.expiresAt < new Date()) {
         throw new AppError("Session Invalid", 401)
     }
 
     await prisma.session.update({
-        where: { refresh_token: refreshToken },
+        where: { refreshToken: refreshToken },
         data: {revoked: true}
     });
 
-    const accessToken = generateAcesssToken(session.user_id);
-    const newRefreshToken = generateRefreshToken(session.user_id);
+    const accessToken = generateAcesssToken(session.userId);
+    const newRefreshToken = generateRefreshToken(session.userId);
 
     await prisma.session.create({
         data: {
-            user_id: session.user_id,
-            refresh_token: newRefreshToken,
-            expires_at: getRefreshTokenExpiry()
+            userId: session.userId,
+            refreshAt: getRefreshTokenExpiry()
         }
     })
     return { accessToken, refreshToken: newRefreshToken }
@@ -134,7 +130,7 @@ export async function refresh(refreshToken) {
 
 export async function logout(refreshToken) {
     await prisma.session.update({
-        where: { refresh_token: refreshToken },
+        where: { refreshToken: refreshToken },
         data: {revoked: true}
     })
 }

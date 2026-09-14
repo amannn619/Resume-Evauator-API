@@ -1,6 +1,7 @@
 import express from "express";
 import authRouter from "./routes/authRoutes.js";
 import resumeRouter from "./routes/resumeRoutes.js";
+import evaluationRouter from "./routes/evaluationRoutes.js";
 import cors from "cors";
 import fs from "fs";
 import SwaggerUi from "swagger-ui-express";
@@ -26,7 +27,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRouter);
 
-app.use("/api/resume", resumeRouter )
+app.use("/api/resume", resumeRouter);
+app.use("/api/evaluation", evaluationRouter);
 
 app.use((req, res) => {
     res.status(404).json({ status: "error", error: "Page not found." });

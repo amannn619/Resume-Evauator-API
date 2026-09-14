@@ -24,14 +24,14 @@ export async function me(req, res) {
 
 export async function register(req, res) {
     // #swagger.tags = ['auth']
-    const { username, password } = req.body;
-    const { accessToken, refreshToken, user } = await authService.register(username, password)
+    const { userName, password } = req.body;
+    const { accessToken, refreshToken, user } = await authService.register(userName, password)
     res.cookie('refresh_token', refreshToken, cookieOptions)
     return new AppResponse(res, {accessToken, user}, null, 201)
 }
 export async function login(req, res) {
     // #swagger.tags = ['auth']
-    const { username, password } = req.body;
+    const { userName, password } = req.body;
 
     const existingRefreshToken = req.cookies.refresh_token;
     if (existingRefreshToken) {
@@ -42,7 +42,7 @@ export async function login(req, res) {
             
         }
     }
-    const { accessToken, refreshToken, user } = await authService.login(username, password);
+    const { accessToken, refreshToken, user } = await authService.login(userName, password);
     res.cookie('refresh_token', refreshToken, cookieOptions);
     return new AppResponse(res, { accessToken, user }, null, 201);
 };
