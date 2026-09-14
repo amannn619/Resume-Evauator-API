@@ -44,21 +44,21 @@ export async function evaluateWithAI(resumeText, jobDescription) {
         Respond strictly in valid JSON format:
         {
         "score": <integer between 0 and 100>,
-        "detected_experience": "<e.g., '3.2 years' or 'Unclear'>",
+        "detectedExperience": "<e.g., '3.2 years' or 'Unclear'>",
         "strengths": ["<strength 1>", "<strength 2>"],
-        "missing_keywords": ["<missing tool>"],
+        "missinKeywords": ["<missing tool>"],
         "improvements": ["<actionable recommendation>"],
-        "job_title": "<job title extracted from the description>"
+        "jobTitle": "<job title extracted from the description>"
         }
         
         You MUST output valid JSON exactly matching this structure:
         {
         "score": <number 0-100 based on a strict combination of skills and experience match>,
-        "detected_experience": "<string, e.g. '3.5 years' or 'Unclear'>",
+        "detectedExperience": "<string, e.g. '3.5 years' or 'Unclear'>",
         "strengths": ["<qualitative alignment>"],
-        "missing_keywords": ["<keyword 1>", "<keyword 2>"],
+        "missingKeywords": ["<keyword 1>", "<keyword 2>"],
         "improvements": ["<actionable tip>"],
-        "job_title": "<job title extracted from the description>"
+        "jobTitle": "<job title extracted from the description>"
         }
     `;
 

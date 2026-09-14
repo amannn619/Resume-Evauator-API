@@ -4,8 +4,15 @@ import prisma from "./db.js";
 export async function getAllEvaluations(userId) {
     const evaluations = await prisma.evaluation.findMany({
         where: { userId: userId },
-        orderBy : {createdAt: 'asc'}
-
+        orderBy : {createdAt: 'asc'},
+        include: {
+            resume: {
+                select: {
+                    id: true,
+                    fileName: true
+                }
+            }
+        }
     })
     return evaluations;
 }
@@ -25,7 +32,7 @@ export async function evaluateSavedResume(userId, resumeId, description) {
             data: {
                 userId: userId,
                 resumeId: resumeId,
-                jobTitle: evaluation.job_title || 'Unspecified Role',
+                jobTitle: evaluation.jobTitle || 'Unspecified Role',
                 jobDescription: description,
                 score: score,
                 aiResponse: evaluation
