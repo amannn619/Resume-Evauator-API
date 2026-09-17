@@ -11,7 +11,7 @@ import cookieParser from "cookie-parser";
 const corsOptions = {
     origin: [
         'http://localhost:5173',
-        'https://resume-evauator-api.onrender.com'
+        'https://resume-evaluator-self.vercel.app'
     ],
     credentials: true
 }
