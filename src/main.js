@@ -15,9 +15,9 @@ const corsOptions = {
 
 const PORT = process.env.PORT || 3000;
 const MODE = process.env.NODE_ENV || "dev";
-console.log(PORT, MODE)
 const app = express();
 
+app.set('trust proxy', 1);
 if (MODE == "dev") {
     const swaggerDoc = JSON.parse(fs.readFileSync("./swagger-output.json", 'utf-8'));
     app.use('/api-docs', SwaggerUi.serve, SwaggerUi.setup(swaggerDoc));
