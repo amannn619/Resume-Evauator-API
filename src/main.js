@@ -13,9 +13,15 @@ const corsOptions = {
     credentials: true
 }
 
-const swaggerDoc = JSON.parse(fs.readFileSync("./swagger-output.json", 'utf-8'));
+const PORT = process.env.PORT || 3000;
+const MODE = process.env.NODE_ENV || "dev";
+console.log(PORT, MODE)
 const app = express();
-app.use('/api-docs', SwaggerUi.serve, SwaggerUi.setup(swaggerDoc));
+
+if (MODE == "dev") {
+    const swaggerDoc = JSON.parse(fs.readFileSync("./swagger-output.json", 'utf-8'));
+    app.use('/api-docs', SwaggerUi.serve, SwaggerUi.setup(swaggerDoc));
+}
 
 app.use(cors(corsOptions));
 app.use(cookieParser())
@@ -36,8 +42,8 @@ app.use((req, res) => {
 
 app.use(errorHandler);
 
-app.listen(3000, () => {
-    console.log("Server is running on port 3000")
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
 })
 
 export default app;
